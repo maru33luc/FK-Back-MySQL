@@ -49,7 +49,6 @@ export class LoginService {
 
     async register(email: string, password: string, nombre: string, apellido: string) {
         let lenght = 0;
-        console.log('dentro de register');
         try {
             const users = await this.getUsers();
             if (users) {
@@ -57,26 +56,24 @@ export class LoginService {
                 lenght = users.length;
                 if (userFound) {
                     throw new Error('El usuario ya existe');
-                } 
+                }
             }
-            try{
-                console.log('creando user');
+            try {
                 const user: User = {
-                id: lenght + 1,
-                name: nombre,
-                last_name: apellido,
-                email: email,
-                password: password,
-                isAdmin: false
-            };
-            const userCredential = await axios.post(this.urlAuth, user);
-            console.log(userCredential.data);
-            alert('Usuario registrado con éxito');
-            }catch(error){
+                    id: lenght + 1,
+                    name: nombre,
+                    last_name: apellido,
+                    email: email,
+                    password: password,
+                    isAdmin: false
+                };
+                const userCredential = await axios.post(this.urlAuth, user);
+                alert('Usuario registrado con éxito');
+            } catch (error) {
                 alert('No se pudo registrar el usuario')
             }
 
-        }catch (error) {
+        } catch (error) {
             alert('No se pudo obtener la lista de usuarios');
         }
 
@@ -87,9 +84,15 @@ export class LoginService {
             const userCredential = {
                 email: email,
                 password: password
-                }
-            
-            const user = await axios.post (`${this.urlAuth}/auth`, userCredential);
+            }
+
+            const user = await axios.post(`${this.urlAuth}/auth`, userCredential, { withCredentials: true });
+            if (user) {
+                window.location.href = '/home';
+            } else {
+                alert('No se pudo iniciar sesión');
+                window.location.href = '/login';
+            }
         } catch (e) {
             console.log(e);
             throw e;
@@ -98,9 +101,16 @@ export class LoginService {
 
     async logout() {
         try {
-            await this.auth.signOut();
-        } catch (error) {
-            console.log(error);
+            const res = await axios.post(`${this.urlAuth}/logout`, {}, { withCredentials: true });
+            if (res) {
+                window.location.href = '/home';
+                alert('Sesión cerrada con éxito');
+            } else {
+                alert('No se pudo cerrar sesión');
+            }
+        } catch (e) {
+            console.log(e);
+            throw e;
         }
     }
 
@@ -151,7 +161,6 @@ export class LoginService {
                     carrito: carrito
                 }
                 const docSnap = await setDoc(docRef, payload);
-                console.log(docSnap);
             }
             catch (error) {
                 console.log(error);

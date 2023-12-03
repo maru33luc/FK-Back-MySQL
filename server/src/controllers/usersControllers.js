@@ -1,3 +1,4 @@
+const session = require('express-session');
 const userServices = require('../services/userServices');
 
 module.exports = {
@@ -52,10 +53,27 @@ module.exports = {
             const email = req.body.email;
             const password = req.body.password;
             const user = await userServices.getUserByEmailAndPassword(email, password);
+        //    establecer una cookie de sesion
+            req.session.user = user;
+            req.session.auth = true;
+            res.cookie('user', user, { httpOnly: true, secure: true });
             res.json(user);
         }catch(error){
             console.log(error);
             res.json({error: 'Ocurrio un error'});
         }
+    },
+    isLoggedIn : (req, res) => {
+        if(req.session.user){
+            res.json(req.session.user);
+        }else{
+            res.json({error: 'No autorizado'});
+        }
+    },
+    logout : (req, res) => {
+        req.session.destroy();
+        // eliminar cookie del navegador
+        res.clearCookie('user');
+        res.json({message: 'Sesion cerrada'});
     }
 }
