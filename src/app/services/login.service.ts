@@ -68,7 +68,7 @@ export class LoginService {
         }
     }
 
-    async login(email: string, password: string) {
+    async login(email: string, password: string): Promise<any> {
         try {
             const userCredential = {
                 email: email,
@@ -77,10 +77,11 @@ export class LoginService {
             const user = await axios.post(`${this.urlAuth}/auth`, userCredential, { withCredentials: true });
             if (user) {
                 this.authState$?.next(user.data);
-                this.isUserLoggedIn();
+                return user.data;
             } else {
                 alert('No se pudo iniciar sesión');
                 window.location.href = '/login';
+                return null;
             }
         } catch (e) {
             console.log(e);

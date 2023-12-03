@@ -1,5 +1,4 @@
 export const environments = {
-    // urlFunkosJson: 'http://localhost:4000',
     urlFunkosData: 'http://localhost:3000/fk',
     urlUsersData: 'http://localhost:3000/users',
     urlAPITolkien: 'https://the-one-api.dev/v2',
@@ -7,15 +6,5 @@ export const environments = {
     urlAPIStarWars: 'https://starwars-databank-server.vercel.app/api/v1',
     urlAPIPotter: 'https://potterhead-api.vercel.app',
     urlPokemonJson: 'http://localhost:4000',
-    urlFormsPree: 'https://formspree.io/f/xknlabrk',
-
-    firebaseConfig: {
-        "projectId": "funkostore-b44e7",
-        "appId": "1:599703726366:web:dc176fcc201097bd2fc10f",
-        "storageBucket": "funkostore-b44e7.appspot.com",
-        "apiKey": "AIzaSyDtU1Rdh5mZXb5OFL9KWJetYtfi8hcJfE0",
-        "authDomain": "funkostore-b44e7.firebaseapp.com",
-        "messagingSenderId": "599703726366",
-        "measurementId": "G-QFY4FKRWLQ"
-    }
+    urlFormsPree: 'https://formspree.io/f/xknlabrk'
 }

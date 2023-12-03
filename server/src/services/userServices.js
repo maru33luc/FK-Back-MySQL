@@ -1,5 +1,6 @@
 const UserModel = require('../models/userModel');
 const bcrypt = require('bcrypt');
+const cartServices = require('./cartServices');
 
 module.exports = {
     getAllUsers: async() => {
@@ -24,6 +25,8 @@ module.exports = {
         try{
             newUser.password = bcrypt.hashSync(newUser.password, 10);
             const user = await UserModel.create(newUser);
+            const cart = await cartServices.createCart(user.id);
+            console.log('cart', cart);
             return user;
         }catch(error){
             console.log(error);

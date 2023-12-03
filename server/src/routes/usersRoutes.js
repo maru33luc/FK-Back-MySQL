@@ -8,13 +8,13 @@ router.get ('/', getAllUsers);
 
 router.post ('/auth', authUser); // login
 
-router.get ('/auth', isLoggedIn);
+router.get ('/auth', isLoggedIn); // check if logged in
 
 router.post ('/logout', logout);
 
 router.get ('/:id', getUserById);
 
-router.post ('/',addUser);
+router.post ('/',addUser); // register
 
 router.put ('/:id', updateUser);
 

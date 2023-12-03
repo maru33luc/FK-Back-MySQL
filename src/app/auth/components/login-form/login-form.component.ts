@@ -45,11 +45,13 @@ export class LoginFormComponent implements OnInit {
         } else {
             try {
                 this.dataLoaded = false;
-                await this.loginService.login(
+                const res = await this.loginService.login(
                     this.loginForm.value.email,
                     this.loginForm.value.password
                 );
-                this.dataLoaded = true;
+                if(res){
+                    this.isCorrect = true;
+                    this.dataLoaded = true;
                 if (await this.loginService.isUserLoggedIn()) {
                     if (this.loginService.isAdmin()) {
                         this.router.navigateByUrl('/admin');
@@ -57,6 +59,11 @@ export class LoginFormComponent implements OnInit {
                         this.router.navigateByUrl('/home');
                     }
                 }
+                }else{
+                    this.isCorrect = false;
+                    this.dataLoaded = true;
+                }
+                
             } catch (e) {
                 this.isCorrect = false;
                 this.dataLoaded = true;
