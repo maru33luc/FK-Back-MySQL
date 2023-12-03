@@ -6,6 +6,9 @@ import {
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { FunkoCart } from '../interfaces/Cart';
 import { Observable } from 'rxjs';
+import { User } from '../interfaces/User';
+import { environments } from 'src/environments/environments';
+import axios from 'axios';
 
 
 @Injectable({
@@ -14,6 +17,7 @@ import { Observable } from 'rxjs';
 export class LoginService {
 
     private authState$: Observable<any> | undefined;
+    urlAuth = environments.urlUsersData;
 
     constructor(private auth: Auth) {
         this.initialize();
@@ -32,30 +36,60 @@ export class LoginService {
         return this.authState$;
     }
 
-    async register(email: string, password: string, nombre: string, apellido: string) {
+    async getUsers(): Promise<User[] | undefined> {
         try {
-            const response = await createUserWithEmailAndPassword(this.auth, email, password);
-            const user = response.user;
-            const db = getFirestore();
-            const docRef = doc(db, 'users', user.uid);
-            const payload = {
-                nombre: nombre,
-                apellido: apellido,
-                carrito: [] as FunkoCart[],
-                isAdmin: false
-            }
-            const docSnap = await setDoc(docRef, payload);
-            return response;
-        } catch (e) {
-            console.log(e);
-            throw e;
+            const response = await axios.get(this.urlAuth);
+            return response.data;
         }
+        catch (e) {
+            console.log(e);
+        }
+        return undefined;
+    }
+
+    async register(email: string, password: string, nombre: string, apellido: string) {
+        let lenght = 0;
+        console.log('dentro de register');
+        try {
+            const users = await this.getUsers();
+            if (users) {
+                const userFound = users.find((user) => user.email === email);
+                lenght = users.length;
+                if (userFound) {
+                    throw new Error('El usuario ya existe');
+                } 
+            }
+            try{
+                console.log('creando user');
+                const user: User = {
+                id: lenght + 1,
+                name: nombre,
+                last_name: apellido,
+                email: email,
+                password: password,
+                isAdmin: false
+            };
+            const userCredential = await axios.post(this.urlAuth, user);
+            console.log(userCredential.data);
+            alert('Usuario registrado con éxito');
+            }catch(error){
+                alert('No se pudo registrar el usuario')
+            }
+
+        }catch (error) {
+            alert('No se pudo obtener la lista de usuarios');
+        }
+
     }
 
     async login(email: string, password: string) {
         try {
-            const user = await signInWithEmailAndPassword(this.auth, email, password);
-            this.getDataActualUser();
+            const userCredential = {
+                email: email,
+                password: password
+                }
+            
+            const user = await axios.post (`${this.urlAuth}/auth`, userCredential);
         } catch (e) {
             console.log(e);
             throw e;

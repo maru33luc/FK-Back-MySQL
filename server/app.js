@@ -3,9 +3,10 @@ const app = express();
 const port = 3000;
 const cors = require('cors');
 const session = require('express-session');
-const crypto = require('crypto');
+
 const db = require('./data/db');
 const funkoRoutes = require('./src/routes/funkoRoutes');
+const usersRoutes = require('./src/routes/usersRoutes');
 
 app.use (cors());
 app.use(express.json());
@@ -40,3 +41,4 @@ app.listen(port, () => {
 // app.use ('/', authRoutes);
 
 app.use ('/fk', funkoRoutes);
+app.use ('/users', usersRoutes);

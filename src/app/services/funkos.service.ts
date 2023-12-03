@@ -9,7 +9,7 @@ import { environments } from 'src/environments/environments';
     providedIn: 'root'
 })
 export class FunkosService {
-    private url: string = environments.urlFunkosJson;
+    private url: string = environments.urlFunkosData;
     private funkos: Funko[] = [];
     private filteredFunkos: Funko[] = [];
     private filteredFunkosSubject: Subject<Funko[]> = new Subject<Funko[]>();
