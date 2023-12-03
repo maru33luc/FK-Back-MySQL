@@ -50,7 +50,7 @@ export class LoginFormComponent implements OnInit {
                     this.loginForm.value.password
                 );
                 this.dataLoaded = true;
-                if (this.loginService.isUserLoggedIn()) {
+                if (await this.loginService.isUserLoggedIn()) {
                     if (this.loginService.isAdmin()) {
                         this.router.navigateByUrl('/admin');
                     } else {

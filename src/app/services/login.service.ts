@@ -1,30 +1,21 @@
 import { Injectable } from '@angular/core';
-import {
-    Auth, createUserWithEmailAndPassword,
-    signInWithEmailAndPassword, getAuth, sendPasswordResetEmail
-} from '@angular/fire/auth';
-import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
-import { FunkoCart } from '../interfaces/Cart';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { User } from '../interfaces/User';
 import { environments } from 'src/environments/environments';
 import axios from 'axios';
-
 
 @Injectable({
     providedIn: 'root'
 })
 export class LoginService {
 
-    private authState$: Observable<any> | undefined;
+    private authState$: BehaviorSubject<any> | undefined;
     urlAuth = environments.urlUsersData;
 
-    constructor(private auth: Auth) {
+    constructor() {
         this.initialize();
         // Crea un observable personalizado para el estado de autenticación
-        this.authState$ = new Observable((observer) => {
-            this.auth.onAuthStateChanged(observer);
-        });
+        this.authState$ = new BehaviorSubject<any>(null);
     }
 
     private initialize(): void {
@@ -72,11 +63,9 @@ export class LoginService {
             } catch (error) {
                 alert('No se pudo registrar el usuario')
             }
-
         } catch (error) {
             alert('No se pudo obtener la lista de usuarios');
         }
-
     }
 
     async login(email: string, password: string) {
@@ -85,10 +74,10 @@ export class LoginService {
                 email: email,
                 password: password
             }
-
             const user = await axios.post(`${this.urlAuth}/auth`, userCredential, { withCredentials: true });
             if (user) {
-                window.location.href = '/home';
+                this.authState$?.next(user.data);
+                this.isUserLoggedIn();
             } else {
                 alert('No se pudo iniciar sesión');
                 window.location.href = '/login';
@@ -115,19 +104,16 @@ export class LoginService {
     }
 
     async getDataActualUser() {
-        const user = getAuth().currentUser;
-        if (user) {
-            try {
-                const db = getFirestore();
-                const docRef = doc(db, 'users', user.uid);
-                const docSnap = await getDoc(docRef);
-                return docSnap.data();
+        try {
+            const res = await axios.get(`${this.urlAuth}/auth`, { withCredentials: true });
+            if (res) {
+                return res.data;
             }
-            catch (error) {
-                console.log(error);
-                return error;
-            }
-        } return null;
+            return null;
+        } catch (e) {
+            console.log(e);
+            return null;
+        }
     }
 
     private onUnload(): void {
@@ -135,90 +121,54 @@ export class LoginService {
     }
 
     async getUserName() {
-        const user = getAuth().currentUser;
-        if (user) {
+        const data = await this.getDataActualUser();
+        if (data) {
+            return data.name;
+        }
+    }
+
+    async updateDataUser(nombre: string, apellido: string, email: string, password: string) {
+        const data = await this.getDataActualUser();
+        if (data) {
+            const user: User = {
+                id: data.id,
+                name: nombre,
+                last_name: apellido,
+                email: email,
+                password: password,
+                isAdmin: data.isAdmin
+            };
             try {
-                const db = getFirestore();
-                const docRef = doc(db, 'users', user.uid);
-                const docSnap = await getDoc(docRef);
-                return docSnap.data()?.['nombre'];
-            }
-            catch (error) {
-                console.log(error);
+                const userCredential = await axios.put(`${this.urlAuth}/${data.id}`, user);
+                alert('Usuario actualizado con éxito');
+            } catch (error) {
+                alert('No se pudo actualizar el usuario')
             }
         }
     }
 
-    async updateDataUser(nombre: string, apellido: string, carrito: FunkoCart[]) {
-        const user = getAuth().currentUser;
-        if (user) {
-            try {
-                const db = getFirestore();
-                const docRef = doc(db, 'users', user.uid);
-                const payload = {
-                    nombre: nombre,
-                    apellido: apellido,
-                    carrito: carrito
-                }
-                const docSnap = await setDoc(docRef, payload);
-            }
-            catch (error) {
-                console.log(error);
-            }
-        }
-    }
-
-    isUserLoggedIn(): boolean {
-        const user = getAuth().currentUser;
-        if (user) {
-            return true;
-        } else {
+    async isUserLoggedIn(): Promise<boolean> {
+        try {
+            const res = await axios.get(`${this.urlAuth}/auth`, { withCredentials: true });
+            return !!res.data; // Verifica si hay datos en la respuesta
+        } catch (e) {
+            console.log(e);
             return false;
         }
     }
 
-    getInfoUsuarioLogueado() {
-        this.authStateObservable()?.subscribe((user) => {
-            if (user) {
-                return user;
-            } else {
-                return null;
-            }
-        });
-    }
-
     isAdmin(): Observable<boolean> {
-        return new Observable((observer) => {
-            this.authStateObservable()?.subscribe((user) => {
+        return new Observable<boolean>((observer) => {
+            this.authState$?.subscribe((user) => {
                 if (user) {
-                    const db = getFirestore();
-                    const docRef = doc(db, 'users', user.uid);
-                    getDoc(docRef)
-                        .then((docSnap) => {
-                            if (docSnap.data()?.['isAdmin']) {
-                                observer.next(true);
-                            } else {
-                                observer.next(false);
-                            }
-                            observer.complete();
-                        })
-                        .catch((error) => {
-                            observer.error(error);
-                        });
+                    observer.next(user.isAdmin);
                 } else {
                     observer.next(false);
-                    observer.complete();
                 }
             });
         });
     }
 
     async resetPassword(email: string) {
-        try {
-            await sendPasswordResetEmail(this.auth, email);
-        } catch (error) {
-            console.error('Error al enviar el correo de restablecimiento de contraseña', error);
-            throw error;
-        }
     }
 }

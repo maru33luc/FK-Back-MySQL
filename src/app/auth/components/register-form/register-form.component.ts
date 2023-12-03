@@ -75,7 +75,6 @@ export class RegisterFormComponent implements OnInit {
                     this.registerForm.value.lastname
                 );
                 this.dataLoaded = true;
-                await this.loginService.logout();
                 await this.router.navigateByUrl('/login/log');
             } catch (e) {
                 this.isUser = true;
