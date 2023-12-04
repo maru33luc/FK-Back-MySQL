@@ -58,20 +58,11 @@ export class CartService {
         try {
             const res = await axios.get(`${this.url}/items/${this.userId}`);
             if(res){
-                console.log(res);
                 const items = res.data;
                 this.cart = items;
                 this.cartSubject.next(this.cart);
                 return items;
             }return [];
-            // const id = res.data.id;
-            // this.cartId = id;
-            // const resp = await axios.get(`${this.url}/${this.userId}/items`);
-            // const items = resp.data; // Fix: Assign resp.data to items
-            // this.cart = items;
-            // this.cartSubject.next(this.cart);
-            // console.log('items', items);
-            // return this.cart;
         } catch (error) {
             console.log(error);
             throw error;
@@ -92,7 +83,6 @@ export class CartService {
                 this.cartSubject.next(this.cart);
                 return item;
             }
-
         } catch (error) {
             console.log(error);
             throw error;

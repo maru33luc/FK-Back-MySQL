@@ -16,9 +16,9 @@
             </div>
 
             <div class="item-cart-quantity">
-                <button class="button item-cart-quantity-btn" id="subtract" (click)="decreaseQuantity(item.id)">-</button>
+                <button class="button item-cart-quantity-btn" id="subtract" (click)="decreaseQuantity(item)">-</button>
                 <input class="item-input" type="text" id="quantity" #quantityButton [value]="item.quantity" placeholder="1">
-                <button class="button item-cart-quantity-btn" id="add" (click)="increaseQuantity(item.id)">+</button>
+                <button class="button item-cart-quantity-btn" id="add" (click)="increaseQuantity(item)">+</button>
                 <p class="item-stock">Disponibles: {{ item.stock}}</p>
             </div>
 

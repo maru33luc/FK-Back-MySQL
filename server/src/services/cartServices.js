@@ -16,7 +16,6 @@ module.exports = {
             const carts = await cartModel.findAll();
             const lenght = carts.length;
             const cart = await cartModel.create({id: lenght+1, id_user: userId});
-            console.log('cart created', cart);
             return cart;
         }catch(error){
             console.log(error);
@@ -38,13 +37,11 @@ module.exports = {
     },
     getCartItems : async (idUser) => {
         try{
-            console.log('idUser', idUser);
             const cart = await cartModel.findOne({
                 where: {
                     id_user: idUser
                 }
             });
-            console.log(cart);
             const cartItems = await cartItemsModel.findAll({
                 where: {
                     id_cart: cart.dataValues.id
@@ -53,7 +50,6 @@ module.exports = {
             if (cartItems.length == 0 || cartItems == null) {
                 return [];
             }
-            console.log('cartItems', cartItems);
             return cartItems;
         }catch(error){
             console.log(error);
