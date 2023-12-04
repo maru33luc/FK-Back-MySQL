@@ -62,14 +62,22 @@ export class CartComponent {
     }
 
     async loadFunkoDetails() {
-        this.cartItemsCopy = [];
+        this.cartItemsCopy = []; // Clear the array before populating it again
+        console.log('cartItems', this.cartItems);
+    
+        // Use a Map to track unique items based on funkoId
+        const uniqueItemsMap = new Map<number, any>();
+    
         for (const item of this.cartItems) {
             try {
                 const funko: any | undefined = await this.funkoService.getFunko(item.funkoId);
                 if (funko) {
-                    let itemACopiar = funko;
-                    itemACopiar.quantity = item.quantity;
-                    this.cartItemsCopy.push(itemACopiar);
+                    const itemACopiar = { ...funko, quantity: item.quantity };
+    
+                    // Use funkoId as the key to ensure uniqueness
+                    uniqueItemsMap.set(item.funkoId, itemACopiar);
+    
+                    console.log('itemACopiar', itemACopiar);
                 } else {
                     console.log('Item not found:', item);
                 }
@@ -77,7 +85,13 @@ export class CartComponent {
                 console.error('Error loading details for item:', item, error);
             }
         }
+    
+        // Convert the Map values back to an array
+        this.cartItemsCopy = Array.from(uniqueItemsMap.values());
+    
+        console.log('cartItemsCopy', this.cartItemsCopy);
     }
+    
 
     async increaseQuantity(item: any) {
         if (this.user) {
