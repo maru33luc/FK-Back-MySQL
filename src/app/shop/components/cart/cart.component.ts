@@ -59,15 +59,15 @@ export class CartComponent {
     async obtenerCart(uid: string) {
 
         const res = await this.cartService.obtenerCarritoDeCompras(uid);
-        if (res) {
-            this.cartItems = res as FunkoCart[];
-            this.cartItemsCopy = this.cartItems.map(item => ({ ...item }));
-            this.valoresPrevios = [];
-            for (const item of this.cartItemsCopy) {
-                this.valoresPrevios.push({ funkoId: item.funkoId, quantity: item.quantity });
-            }
-            await this.loadFunkoDetails();
-        }
+        // if (res) {
+        //     this.cartItems = res as FunkoCart[];
+        //     this.cartItemsCopy = this.cartItems.map(item => ({ ...item }));
+        //     this.valoresPrevios = [];
+        //     for (const item of this.cartItemsCopy) {
+        //         this.valoresPrevios.push({ funkoId: item.funkoId, quantity: item.quantity });
+        //     }
+        //     await this.loadFunkoDetails();
+        // }
     }
 
     async loadFunkoDetails() {

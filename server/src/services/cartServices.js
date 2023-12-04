@@ -23,20 +23,29 @@ module.exports = {
             return {error: 'Ocurrio un error'};
         }
     },
-    getCartById : async (id) => {
+    getCartById : async (idUser) => {
         try{
-            const cart = await cartModel.findByPk(id);
+            const cart = await cartModel.findOne({
+                where: {
+                    id_user: idUser
+                }
+            });
             return cart;
         }catch(error){
             console.log(error);
             return {error: 'Ocurrio un error'};
         }
     },
-    getCartItems : async (id) => {
+    getCartItems : async (idUser) => {
         try{
+            const cart = await cartModel.findOne({
+                where: {
+                    id_user: idUser
+                }
+            });
             const cartItems = await cartItemsModel.findAll({
                 where: {
-                    id_cart: id
+                    id_cart: cart.id
                 }
             });
             return cartItems;
@@ -54,9 +63,13 @@ module.exports = {
             return {error: 'Ocurrio un error'};
         }
     },
-    updateItemInCart : async (id, updatedItem) => {
+    updateItemInCart : async (idFunko, updatedItem) => {
         try{
-            const item = await cartItemsModel.findByPk(id);
+            const item = await cartItemsModel.findOne({
+                where: {
+                    id_funko: idFunko
+                }
+            });
             await item.update(updatedItem);
             return item;
         }catch(error){
@@ -64,9 +77,13 @@ module.exports = {
             return {error: 'Ocurrio un error'};
         }
     },
-    deleteItemFromCart : async (id) => {
+    deleteItemFromCart : async (idFunko) => {
         try{
-            const item = await cartItemsModel.findByPk(id);
+            const item = await cartItemsModel.findOne({
+                where: {
+                    id_funko: idFunko
+                }
+            });
             await item.destroy();
             return {success: 'Se ha eliminado el item'};
         }catch(error){
