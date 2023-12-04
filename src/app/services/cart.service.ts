@@ -71,13 +71,11 @@ export class CartService {
 
     async agregarAlCarrito(funkoId: number, quantity: number): Promise<ItemCart | undefined> {
         try {
-            console.log('quantity', quantity);
             if (!this.cart.find((itemCart) => itemCart.id_funko === funkoId)) {
                 const resp= await this.obtenerCarts();
                 const cart = await this.obtenerCartPorUserId(this.userId!);
                 const length = resp.length;
                 const res = await axios.post(`${this.url}/items/${this.userId}`, { id: length +1 , id_cart: cart.id, id_funko: funkoId, quantity: quantity });
-                console.log('agregando al carrito', res);
                 const item = res.data;
                 this.cart.push(item);
                 this.cartSubject.next(this.cart);
@@ -101,10 +99,12 @@ export class CartService {
         }
     }
 
-    async eliminarDelCarrito(funkoId: number, cartId: number) {
+    async eliminarDelCarrito(funkoId: number, userId: number) {
         try {
-            const res = await axios.delete(`${this.url}/items/${this.userId}`, { data: { id_funko: funkoId } });
-            this.cart = res.data;
+            const res = await axios.delete(`${this.url}/items/${userId}`, { data: { id_funko: funkoId } });
+            console.log('res', res);
+            this.cart = this.cart.filter((item) => item.id_funko !== funkoId);
+            console.log('this cart', this.cart);
             this.cartSubject.next(this.cart);
             return this.cart;
         } catch (error) {

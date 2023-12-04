@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { CartService } from 'src/app/services/cart.service';
 import { FunkosService } from 'src/app/services/funkos.service';
 import { CartLocalService } from 'src/app/services/cart-local.service';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import Swal from 'sweetalert2';
 import { ItemCart, FunkoCart } from 'src/app/interfaces/Cart';
 import { User } from 'src/app/interfaces/User';
@@ -47,6 +47,15 @@ export class CartComponent {
                 await this.loadFunkoDetails();
             }
         });
+        this.cartService.cartSubject.subscribe(async (cart) => {
+            const carrito = cart;
+            this.cartItems = [];
+            carrito.forEach((item) => {
+                this.cartItems.push({ funkoId: item.id_funko, quantity: item.cantidad });
+                this.cartItemsId.push(item.id_funko);
+            });
+            await this.loadFunkoDetails();
+        });
     }
 
     async obtenerCart(uid: string) {
@@ -63,7 +72,6 @@ export class CartComponent {
 
     async loadFunkoDetails() {
         this.cartItemsCopy = []; // Clear the array before populating it again
-        console.log('cartItems', this.cartItems);
     
         // Use a Map to track unique items based on funkoId
         const uniqueItemsMap = new Map<number, any>();
@@ -77,7 +85,6 @@ export class CartComponent {
                     // Use funkoId as the key to ensure uniqueness
                     uniqueItemsMap.set(item.funkoId, itemACopiar);
     
-                    console.log('itemACopiar', itemACopiar);
                 } else {
                     console.log('Item not found:', item);
                 }
@@ -88,8 +95,6 @@ export class CartComponent {
     
         // Convert the Map values back to an array
         this.cartItemsCopy = Array.from(uniqueItemsMap.values());
-    
-        console.log('cartItemsCopy', this.cartItemsCopy);
     }
     
 
@@ -138,11 +143,18 @@ export class CartComponent {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 if (this.user) {
-                    const user = await this.loginService.authStateObservable()?.toPromise(); // Convert Observable to Promise
-                    if (user && user.id) {
-                        this.cartService.eliminarDelCarrito(user.id, this.cart.id);
-                        this.cartItems = this.cartItems.filter((cartItem) => cartItem !== item);
-                    }
+                    console.log('en el if');
+                    this.loginService.authStateObservable()?.subscribe(async (user) => {
+                        if (user) {
+                            const userId = user.id || 0; // Add null check and provide a default value
+                            console.log('item', item);
+                            const res = await this.cartService.eliminarDelCarrito( item.id, userId);
+                            console.log('res', res);
+                            if (res) {
+                                this.cartItems = this.cartItems.filter((cartItem) => cartItem.funkoId !== item.id);   
+                            }
+                        }
+                    });
                 } else {
                     this.cartLocalService.removeFromCart(item.id);
                     this.cartItems = this.cartItems.filter((cartItem) => cartItem !== item);
