@@ -1,147 +1,125 @@
-import { FunkosService } from 'src/app/services/funkos.service';
 import { Injectable } from '@angular/core';
-import { FunkoCart } from '../interfaces/Cart';
+import { ItemCart, FunkoCart, Cart } from '../interfaces/Cart';
 import { LoginService } from './login.service';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { environments } from 'src/environments/environments';
+import axios from 'axios';
 
 @Injectable({
     providedIn: 'root'
 })
 export class CartService {
-    cart: FunkoCart[] = [];
-    cartSubject: BehaviorSubject<FunkoCart[]> = new BehaviorSubject(this.cart);
-    diferenciaCantidad: number = 0;
-    fkCambiadoId: number | undefined = 0;
-    valoresPrevios: { funkoId: number; quantity: number }[] = [];
+    cart: ItemCart[] = [];
+    cartId: number | undefined = undefined;
+    userId: number | undefined;
+    cartSubject: BehaviorSubject<ItemCart[]> = new BehaviorSubject(this.cart);
+    url: string = environments.urlCartData;
 
-    constructor(private loginService: LoginService, private funkoService: FunkosService) {
+    constructor(private loginService: LoginService) {
 
         //Suscripcion a cambios de estado de autenticacion    
-        this.loginService.authStateObservable()?.subscribe((user) => {
+        this.loginService.authStateObservable()?.subscribe(async (user) => {
             if (user) {
-                this.obtenerCarritoDeCompras(user.uid);
+                this.userId = user.id;
+                const res = await this.obtenerCartPorUserId(this.userId!);
+                this.cartId = res.id;
+                const resp = await axios.get(`${this.url}/items/${this.userId}`);
+                this.cart = resp.data;
+                this.cartSubject.next(this.cart);
             }
         });
         //Suscripcion a cambios en el carrito
         this.cartSubject.subscribe((cart) => {
             this.cart = cart;
-            this.valoresPrevios = [];
-            for (const item of this.cart) {
-                this.valoresPrevios.push({ funkoId: item.funkoId, quantity: item.quantity });
-            }
         });
     }
 
-    async obtenerCarritoDeCompras(userId: string) {
-        // try {
-        //     const db = getFirestore();
-        //     const docRef = doc(db, 'users', userId);
-        //     const docSnap = await getDoc(docRef);
-        //     const cartData = docSnap.data()?.['carrito'] || {};
-        //     this.cart = cartData as FunkoCart[];
-        //     this.cartSubject.next(this.cart);
-        //     return this.cart;
-        // } catch (error) {
-        //     console.log(error);
-        //     return error;
-        // }
+    async obtenerCartPorUserId(userId: number): Promise<Cart> {
+        try {
+            const res = await axios.get(`${this.url}/${userId}`);
+            return res.data;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     }
 
-    async agregarAlCarrito(funkoId: number, quantity: number) {
-        // this.loginService.authStateObservable()?.subscribe(async (user) => {
-        //     if (user) {
-        //         try {
-        //             if (typeof funkoId === 'number' && typeof quantity === 'number') {
-        //                 if (user) {
-
-        //                     if (this.cart) {
-        //                         const existingCartItemIndex = this.cart.findIndex((item: FunkoCart) => item.funkoId === funkoId);
-        //                         if (existingCartItemIndex !== -1) {
-        //                             this.cart[existingCartItemIndex].quantity += quantity;
-        //                             this.cartSubject.next(this.cart);
-        //                         } else {
-        //                             this.cart.push({ funkoId, quantity });
-        //                             this.cartSubject.next(this.cart);
-        //                         }
-        //                         const db = getFirestore();
-        //                         const docRef = doc(db, 'users', user.uid);
-        //                         await updateDoc(docRef, {
-        //                             carrito: this.cart
-        //                         });
-        //                         return this.cart;
-        //                     }
-        //                 }
-        //             }
-        //         } catch (error) {
-        //             console.log(error);
-        //             return error;
-        //         }
-        //     } return undefined
-        // });
+    async obtenerCarts(): Promise<Cart[]> {
+        try {
+            const res = await axios.get(`${this.url}`);
+            return res.data;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     }
 
-    async actualizarCantidades(cambiosDeCantidad: { funkoId: number; quantity: number }[]) {
-        // const user = this.auth.currentUser;
-        // if (user) {
-        //     try {
-        //         const db = getFirestore();
-        //         const docRef = doc(db, 'users', user.uid);
-        //         for (const cambio of cambiosDeCantidad) {
-        //             const cartItem = this.cart.find((item) => item.funkoId === cambio.funkoId);
-        //             if (cartItem) {
-        //                 cartItem.quantity = cambio.quantity;
-        //             }
-        //         }
-        //         await updateDoc(docRef, {
-        //             carrito: this.cart
-        //         });
-        //         // Actualizar el stock después de haber actualizado las cantidades en el carrito
-        //         for (const cambio of cambiosDeCantidad) {
-        //             this.diferenciaCantidad = 0;
-        //             const fk = this.cart.filter((item) => item.funkoId === cambio.funkoId);
-        //             const valorPrevio = this.valoresPrevios.find((item) => item.funkoId === cambio.funkoId);
-        //             this.diferenciaCantidad = cambio.quantity - valorPrevio!.quantity;
-        //             const cartItem = this.cart.find((item) => item.funkoId === cambio.funkoId);
-        //             if (cartItem) {
-        //                 let stock = await this.funkoService.obtenerStockFunko(cartItem.funkoId);
-        //                 stock ? (stock -= this.diferenciaCantidad) : (stock = 0);
-        //                 if (stock === 0 && this.diferenciaCantidad <= 0) {
-        //                     stock -= this.diferenciaCantidad;
-        //                 }
-
-        //                 const fk = await this.funkoService.getFunko(cartItem.funkoId);
-        //                 if (fk) {
-        //                     fk.stock = stock ? stock : 0;
-        //                     await this.funkoService.putFunko(fk, fk.id);
-        //                     this.fkCambiadoId = fk.id;
-        //                 }
-        //             }
-        //         }
-        //         this.cartSubject.next(this.cart);
-        //     } catch (error) {
-        //         console.error(error);
-        //     }
-        // }
+    async obtenerCarritoDeCompras(userId: number | undefined): Promise<ItemCart[] > {
+        try {
+            const res = await axios.get(`${this.url}/items/${this.userId}`);
+            if(res){
+                console.log(res);
+                const items = res.data;
+                this.cart = items;
+                this.cartSubject.next(this.cart);
+                return items;
+            }return [];
+            // const id = res.data.id;
+            // this.cartId = id;
+            // const resp = await axios.get(`${this.url}/${this.userId}/items`);
+            // const items = resp.data; // Fix: Assign resp.data to items
+            // this.cart = items;
+            // this.cartSubject.next(this.cart);
+            // console.log('items', items);
+            // return this.cart;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     }
 
-    async eliminarDelCarrito(funkoId: number) {
-        // const user = this.auth.currentUser;
-        // if (user) {
-        //     try {
-        //         const db = getFirestore();
-        //         const docRef = doc(db, 'users', user.uid);
-        //         this.cart = this.cart.filter((item) => item.funkoId !== funkoId);
-        //         await updateDoc(docRef, {
-        //             carrito: this.cart
-        //         });
-        //         this.cartSubject.next(this.cart);
-        //     } catch (error) {
-        //         console.error(error);
-        //     }
-        // }
-        // else {
-        //     this.cart = this.cart.filter((item) => item.funkoId !== funkoId);
-        //     this.cartSubject.next(this.cart);
-        // }
+    async agregarAlCarrito(funkoId: number, quantity: number): Promise<ItemCart | undefined> {
+        try {
+            console.log('quantity', quantity);
+            if (!this.cart.find((itemCart) => itemCart.id_funko === funkoId)) {
+                const resp= await this.obtenerCarts();
+                const cart = await this.obtenerCartPorUserId(this.userId!);
+                const length = resp.length;
+                const res = await axios.post(`${this.url}/items/${this.userId}`, { id: length +1 , id_cart: cart.id, id_funko: funkoId, quantity: quantity });
+                console.log('agregando al carrito', res);
+                const item = res.data;
+                this.cart.push(item);
+                this.cartSubject.next(this.cart);
+                return item;
+            }
+
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }return undefined;
+    }
+
+    async actualizarCantidades(idUser: number, idCart: number, idItem: number, quantity: number) {
+        try {
+            const res = await axios.put(`${this.url}/items/${idUser}`, { id_funko: idItem, cantidad: quantity });
+            this.cart = res.data;
+            this.cartSubject.next(this.cart);
+            return this.cart;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    }
+
+    async eliminarDelCarrito(funkoId: number, cartId: number) {
+        try {
+            const res = await axios.delete(`${this.url}/items/${this.userId}`, { data: { id_funko: funkoId } });
+            this.cart = res.data;
+            this.cartSubject.next(this.cart);
+            return this.cart;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
     }
 }

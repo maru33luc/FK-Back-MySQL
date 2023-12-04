@@ -1,6 +1,17 @@
 const cartServices = require('../services/cartServices');
 
 module.exports = {
+
+    getAllCarts : async (req, res) => {
+        try{
+            const carts = await cartServices.getCarts();
+            res.json(carts);
+        }catch(error){
+            console.log(error);
+            res.json({error: 'Ocurrio un error'});
+        }
+    },
+
     getCartById: async (req, res) => {
         try{
             const cart = await cartServices.getCartById(req.params.id);
@@ -21,7 +32,7 @@ module.exports = {
     },
     addItemToCart: async (req, res) => {
         try{
-            const cartItem = await cartServices.addItemToCart(req.body);
+            const cartItem = await cartServices.addItemToCart(req.params.id, req.body);
             res.json(cartItem);
         }catch(error){
             console.log(error);
@@ -39,7 +50,7 @@ module.exports = {
     },
     deleteItemFromCart: async (req, res) => {
         try{
-            const cartItem = await cartServices.deleteItemFromCart(req.params.id);
+            const cartItem = await cartServices.deleteItemFromCart(req.params.id, req.body);
             res.json(cartItem);
         }catch(error){
             console.log(error);

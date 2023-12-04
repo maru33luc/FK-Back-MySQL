@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const db = require('./data/db');
 const funkoRoutes = require('./src/routes/funkoRoutes');
 const usersRoutes = require('./src/routes/usersRoutes');
+const cartRoutes = require('./src/routes/cartRoutes');
 
 
 app.use(express.json());
@@ -50,3 +51,4 @@ app.listen(port, () => {
 
 app.use ('/fk', funkoRoutes);
 app.use ('/users', usersRoutes);
+app.use ('/carts', cartRoutes);

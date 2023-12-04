@@ -23,7 +23,7 @@ export class LoginService {
     }
 
     // Define un método para obtener el observable del estado de autenticación
-    authStateObservable(): Observable<any> | undefined {
+    authStateObservable(): Observable<User> | undefined {
         return this.authState$;
     }
 

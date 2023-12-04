@@ -38,6 +38,30 @@ module.exports = {
     },
     getCartItems : async (idUser) => {
         try{
+            console.log('idUser', idUser);
+            const cart = await cartModel.findOne({
+                where: {
+                    id_user: idUser
+                }
+            });
+            console.log(cart);
+            const cartItems = await cartItemsModel.findAll({
+                where: {
+                    id_cart: cart.dataValues.id
+                }
+            });
+            if (cartItems.length == 0 || cartItems == null) {
+                return [];
+            }
+            console.log('cartItems', cartItems);
+            return cartItems;
+        }catch(error){
+            console.log(error);
+            return {error: 'Ocurrio un error'};
+        }
+    },
+    addItemToCart : async (idUser, cartItem) => {
+        try{
             const cart = await cartModel.findOne({
                 where: {
                     id_user: idUser
@@ -45,29 +69,32 @@ module.exports = {
             });
             const cartItems = await cartItemsModel.findAll({
                 where: {
-                    id_cart: cart.id
+                    id_cart: cart.dataValues.id
                 }
             });
-            return cartItems;
+            if(cartItems.length == 0 || cartItems == null){
+                const item = await cartItemsModel.create({id: 1, id_cart: cart.dataValues.id, id_funko: cartItem.id_funko, cantidad: cartItem.quantity});
+                return item;
+            }
+            const length = cartItems.length;
+            const item = await cartItemsModel.create({id: length+1, id_cart: cart.dataValues.id, id_funko: cartItem.id_funko, cantidad: cartItem.quantity, subtotal : 0});
+            return item;
         }catch(error){
             console.log(error);
             return {error: 'Ocurrio un error'};
         }
     },
-    addItemToCart : async (cartItem) => {
+    updateItemInCart : async (idUser, updatedItem) => {
         try{
-            const newItem = await cartItemsModel.create(cartItem);
-            return newItem;
-        }catch(error){
-            console.log(error);
-            return {error: 'Ocurrio un error'};
-        }
-    },
-    updateItemInCart : async (idFunko, updatedItem) => {
-        try{
+            const cart = await cartModel.findOne({
+                where: {
+                    id_user: idUser
+                }
+            });
             const item = await cartItemsModel.findOne({
                 where: {
-                    id_funko: idFunko
+                    id_cart: cart.dataValues.id,
+                    id_funko: updatedItem.id_funko
                 }
             });
             await item.update(updatedItem);
@@ -77,15 +104,21 @@ module.exports = {
             return {error: 'Ocurrio un error'};
         }
     },
-    deleteItemFromCart : async (idFunko) => {
+    deleteItemFromCart : async (idUser, idFunko) => {
         try{
+            const cart = await cartModel.findOne({
+                where: {
+                    id_user: idUser
+                }
+            });
             const item = await cartItemsModel.findOne({
                 where: {
+                    id_cart: cart.dataValues.id,
                     id_funko: idFunko
                 }
             });
             await item.destroy();
-            return {success: 'Se ha eliminado el item'};
+            return item;
         }catch(error){
             console.log(error);
             return {error: 'Ocurrio un error'};

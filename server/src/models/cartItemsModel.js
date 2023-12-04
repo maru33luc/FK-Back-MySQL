@@ -21,7 +21,7 @@ const CartItem = db.define('cart_items', {
     },
     subtotal: {
         type: DataTypes.DECIMAL(10,2),
-        allowNull: false
+        allowNull: true
     },
     createdAt: {
         type: DataTypes.DATE,
@@ -36,3 +36,5 @@ const CartItem = db.define('cart_items', {
         timestamps: true,
       }
 });
+
+module.exports = CartItem;

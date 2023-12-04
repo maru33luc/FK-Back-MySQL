@@ -5,7 +5,7 @@
         <li class="cart-item" *ngFor="let item of cartItemsCopy">
             <div class="cart-item-info">
                 <picture class="cart-item-picture">
-                    <img [src]="item.imageSrc" alt="{{item.name}}">
+                    <img [src]="item.front_image" alt="{{item.name}}">
                 </picture>
 
                 <article class="cart-item-content">
@@ -16,9 +16,9 @@
             </div>
 
             <div class="item-cart-quantity">
-                <button class="button item-cart-quantity-btn" id="subtract" (click)="decreaseQuantity(item)">-</button>
+                <button class="button item-cart-quantity-btn" id="subtract" (click)="decreaseQuantity(item.id)">-</button>
                 <input class="item-input" type="text" id="quantity" #quantityButton [value]="item.quantity" placeholder="1">
-                <button class="button item-cart-quantity-btn" id="add" (click)="increaseQuantity(item)">+</button>
+                <button class="button item-cart-quantity-btn" id="add" (click)="increaseQuantity(item.id)">+</button>
                 <p class="item-stock">Disponibles: {{ item.stock}}</p>
             </div>
 
