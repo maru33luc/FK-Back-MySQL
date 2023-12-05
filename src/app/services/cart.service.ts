@@ -90,7 +90,7 @@ export class CartService {
     async actualizarCantidades(idUser: number, idCart: number, idItem: number, quantity: number) {
         try {
             const res = await axios.put(`${this.url}/items/${idUser}`, { id_funko: idItem, cantidad: quantity });
-            this.cart = res.data;
+            this.cart = await this.obtenerCarritoDeCompras(idUser);
             this.cartSubject.next(this.cart);
             return this.cart;
         } catch (error) {

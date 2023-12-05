@@ -108,7 +108,6 @@ export class CartLocalService {
         }
         const transaction = this.db.transaction(this.cartStoreName, 'readwrite');
         const store = transaction.objectStore(this.cartStoreName);
-        console.log(item);
         const existingItemRequest = store.get(item.funkoId); // Pass the funkoId property
         const existingItem = await new Promise<FunkoCart>((resolve, reject) => {
             existingItemRequest.onsuccess = () => resolve(existingItemRequest.result);

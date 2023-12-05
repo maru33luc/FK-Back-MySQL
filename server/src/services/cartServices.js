@@ -107,8 +107,6 @@ module.exports = {
                     id_user: idUser
                 }
             });
-            console.log('cart', cart);
-            console.log('idFunko', idFunko);
             const fkId = idFunko.id_funko;
             const item = await cartItemsModel.findOne({
                 where: {
@@ -116,7 +114,6 @@ module.exports = {
                     id_funko: fkId
                 }
             });
-            console.log('item', item);
             await item.destroy();
             return item;
         }catch(error){
