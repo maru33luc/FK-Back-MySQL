@@ -112,8 +112,6 @@ export class CartComponent {
 
                 // Actualiza la cantidad localmente después de la confirmación del servidor
                 item.quantity = updatedQuantity;
-                
-
             }
             else {
                 const funko: FunkoCart = {
@@ -125,13 +123,11 @@ export class CartComponent {
 
                 await this.funkoService.actualizarStock(item.id, item.stock - 1);
                 item.stock--;
-                
-            }console.log('this.cartItems', this.cartItems);
-            this.totalQuantity.next(this.getTotalQuantity()+1);
+                this.totalQuantity.next(this.totalQuantity.value + 1);
+            }
         });
-        
-
     }
+
     async decreaseQuantity(item: any) {
         if (item.quantity > 0) {
             this.loginService.authStateObservable()?.subscribe(async (user) => {
@@ -158,10 +154,9 @@ export class CartComponent {
                     item.quantity--;
                     await this.funkoService.actualizarStock(item.id, item.stock + 1);
                     item.stock++;
+                    this.totalQuantity.next(this.totalQuantity.value - 1);
                 }
-                this.totalQuantity.next(this.getTotalQuantity()-1);
             });
-
         }
     }
 
@@ -196,12 +191,8 @@ export class CartComponent {
         });
     }
 
-    getTotalQuantity(): number  {
-        let totalQuantity = 0;
-        this.totalQuantity.subscribe((total) => {
-            totalQuantity = total;
-        });
-        return totalQuantity;
+    getTotalQuantity(): Observable<number> {
+        return this.totalQuantity;
     }
 
     getSubtotal(): number {
