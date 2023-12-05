@@ -19,8 +19,6 @@ export class CartComponent {
     cartItemsId: number[] = [];
     user: Observable<User> | undefined;
     cart: any;
-    quantityChanges: any;
-    valoresPrevios: any;
 
     constructor(
         private cartService: CartService,
@@ -54,7 +52,6 @@ export class CartComponent {
                 this.cartItems.push({ funkoId: item.id_funko, quantity: item.cantidad });
                 this.cartItemsId.push(item.id_funko);
             });
-            await this.loadFunkoDetails();
         });
     }
 
@@ -73,7 +70,6 @@ export class CartComponent {
 
     async loadFunkoDetails() {
         this.cartItemsCopy = []; // Clear the array before populating it again
-
         // Use a Map to track unique items based on funkoId
         const uniqueItemsMap = new Map<number, any>();
 
@@ -95,17 +91,22 @@ export class CartComponent {
         this.cartItemsCopy = Array.from(uniqueItemsMap.values());
     }
 
-
     async increaseQuantity(item: any) {
-
         this.loginService.authStateObservable()?.subscribe(async (user) => {
             if (user) {
-                const userId = user.id || 0; // Add null check and provide a default value
-                item.quantity++;
-                const res = await this.cartService.actualizarCantidades(userId, this.cart.id, item.id, item.quantity);
-                // item.stock--;
-                await this.funkoService.actualizarStock(item.id, item.stock);
-                
+                const userId = user.id || 0;
+                const updatedQuantity = item.quantity + 1;
+
+                // Primero actualiza el stock
+                await this.funkoService.actualizarStock(item.id, item.stock - 1);
+                item.stock--;
+
+                // Luego actualiza la cantidad en el carrito
+                const res = await this.cartService.actualizarCantidades(userId, this.cart.id, item.id, updatedQuantity);
+
+                // Actualiza la cantidad localmente después de la confirmación del servidor
+                item.quantity = updatedQuantity;
+
             }
             else {
                 const funko: FunkoCart = {
@@ -114,35 +115,43 @@ export class CartComponent {
                 }
                 this.cartLocalService.updateCartItem(funko);
                 item.quantity++;
-                
+
                 await this.funkoService.actualizarStock(item.id, item.stock - 1);
-                // item.stock--;
+                item.stock--;
             }
         });
-        item.stock--;
+
+
     }
     async decreaseQuantity(item: any) {
         if (item.quantity > 0) {
-            if (this.user) {
-                const user = await this.loginService.authStateObservable()?.toPromise(); // Convert Observable to Promise
-                if (user && user.id) {
-                    const res = await this.cartService.actualizarCantidades(user.id, this.cart.id, item.funkoId, 1);
+            this.loginService.authStateObservable()?.subscribe(async (user) => {
+                if (user) {
+                    const userId = user.id || 0;
+                    const updatedQuantity = item.quantity - 1;
 
-                    if (res) {
-                        item.quantity--;
-                    }
+                    // Primero actualiza el stock
                     await this.funkoService.actualizarStock(item.id, item.stock + 1);
+                    item.stock++;
+
+                    // Luego actualiza la cantidad en el carrito
+                    const res = await this.cartService.actualizarCantidades(userId, this.cart.id, item.id, updatedQuantity);
+
+                    // Actualiza la cantidad localmente después de la confirmación del servidor
+                    item.quantity = updatedQuantity;    
                 }
-            } else {
-                const funko: FunkoCart = {
-                    funkoId: item.id,
-                    quantity: item.quantity - 1
+                else {
+                    const funko: FunkoCart = {
+                        funkoId: item.id,
+                        quantity: item.quantity + 1
+                    }
+                    this.cartLocalService.updateCartItem(funko);
+                    item.quantity--;
+                    await this.funkoService.actualizarStock(item.id, item.stock + 1);
+                    item.stock++;
                 }
-                this.cartLocalService.updateCartItem(funko);
-                item.quantity--;
-                await this.funkoService.actualizarStock(item.id, item.stock + 1);
-                item.stock++;
-            }
+            });
+
         }
     }
 
