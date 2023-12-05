@@ -102,9 +102,7 @@ export class CartService {
     async eliminarDelCarrito(funkoId: number, userId: number) {
         try {
             const res = await axios.delete(`${this.url}/items/${userId}`, { data: { id_funko: funkoId } });
-            console.log('res', res);
             this.cart = this.cart.filter((item) => item.id_funko !== funkoId);
-            console.log('this cart', this.cart);
             this.cartSubject.next(this.cart);
             return this.cart;
         } catch (error) {

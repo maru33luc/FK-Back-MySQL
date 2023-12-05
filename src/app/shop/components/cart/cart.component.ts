@@ -81,7 +81,7 @@ export class CartComponent {
                 const funko: any | undefined = await this.funkoService.getFunko(item.funkoId);
                 if (funko) {
                     const itemACopiar = { ...funko, quantity: item.quantity };
-    
+                    console.log(funko);
                     // Use funkoId as the key to ensure uniqueness
                     uniqueItemsMap.set(item.funkoId, itemACopiar);
     
@@ -103,13 +103,21 @@ export class CartComponent {
             const user = await this.loginService.authStateObservable()?.toPromise(); // Convert Observable to Promise
             if (user && user.id) {
                 const res = await this.cartService.actualizarCantidades(user.id, this.cart.id, item.funkoId, 1);
+                
                 if (res) {
                     item.quantity++;
                 }
+                await this.funkoService.actualizarStock(item.id, item.stock - 1);
             }
         } else {
-            this.cartLocalService.updateCartItem({ funkoId: item.funkoId, quantity: item.quantity + 1 });
+            const funko: FunkoCart = {
+                funkoId: item.id,
+                quantity: item.quantity
+            }
+            this.cartLocalService.updateCartItem(funko);
             item.quantity++;
+            await this.funkoService.actualizarStock(item.id, item.stock - 1);
+            item.stock--;
         }
     }
     async decreaseQuantity(item: any) {
@@ -143,13 +151,10 @@ export class CartComponent {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 if (this.user) {
-                    console.log('en el if');
                     this.loginService.authStateObservable()?.subscribe(async (user) => {
                         if (user) {
                             const userId = user.id || 0; // Add null check and provide a default value
-                            console.log('item', item);
                             const res = await this.cartService.eliminarDelCarrito( item.id, userId);
-                            console.log('res', res);
                             if (res) {
                                 this.cartItems = this.cartItems.filter((cartItem) => cartItem.funkoId !== item.id);   
                             }

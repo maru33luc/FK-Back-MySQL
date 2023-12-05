@@ -51,7 +51,6 @@ module.exports = {
     deleteItemFromCart: async (req, res) => {
         try{
             const cartItem = await cartServices.deleteItemFromCart(req.params.id, req.body);
-            console.log('req.body', req.body);
             res.json(cartItem);
         }catch(error){
             console.log(error);

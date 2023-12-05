@@ -88,6 +88,19 @@ export class FunkosService {
         }
     }
 
+    async actualizarStock(id: number | undefined, stock: number) {
+        try {
+            const funko = await this.getFunko(id);
+            if (funko) {
+                funko.stock = stock;
+                await this.putFunko(funko, id);
+            }
+        }
+        catch (e) {
+            console.log(e);
+        }
+    }
+
     async deleteFunko(id: number | undefined) {
         try {
             const response = await axios.delete(`${this.url}/${id}`);
