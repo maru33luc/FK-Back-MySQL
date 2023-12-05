@@ -19,10 +19,6 @@ const CartItem = db.define('cart_items', {
         type: DataTypes.SMALLINT,
         allowNull: false
     },
-    subtotal: {
-        type: DataTypes.DECIMAL(10,2),
-        allowNull: true
-    },
     createdAt: {
         type: DataTypes.DATE,
         allowNull: false,

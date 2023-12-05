@@ -19,6 +19,8 @@ export class CartComponent {
     cartItemsId: number[] = [];
     user: Observable<User> | undefined;
     cart: any;
+    totalQuantity: BehaviorSubject<number> = new BehaviorSubject<number>(0);
+    totalPrice: BehaviorSubject<number> = new BehaviorSubject<number>(0);
 
     constructor(
         private cartService: CartService,
@@ -43,6 +45,8 @@ export class CartComponent {
             if (this.user == undefined) {
                 this.cartItems = items;
                 await this.loadFunkoDetails();
+                const totalItems = this.cartItems.reduce((total, item) => total + item.quantity, 0);
+                this.totalQuantity.next(totalItems);
             }
         });
         this.cartService.cartSubject.subscribe(async (cart) => {
@@ -52,6 +56,8 @@ export class CartComponent {
                 this.cartItems.push({ funkoId: item.id_funko, quantity: item.cantidad });
                 this.cartItemsId.push(item.id_funko);
             });
+            const totalItems = this.cartItems.reduce((total, item) => total + item.quantity, 0);
+                this.totalQuantity.next(totalItems);
         });
     }
 
@@ -106,6 +112,7 @@ export class CartComponent {
 
                 // Actualiza la cantidad localmente después de la confirmación del servidor
                 item.quantity = updatedQuantity;
+                
 
             }
             else {
@@ -118,9 +125,11 @@ export class CartComponent {
 
                 await this.funkoService.actualizarStock(item.id, item.stock - 1);
                 item.stock--;
-            }
+                
+            }console.log('this.cartItems', this.cartItems);
+            this.totalQuantity.next(this.getTotalQuantity()+1);
         });
-
+        
 
     }
     async decreaseQuantity(item: any) {
@@ -150,6 +159,7 @@ export class CartComponent {
                     await this.funkoService.actualizarStock(item.id, item.stock + 1);
                     item.stock++;
                 }
+                this.totalQuantity.next(this.getTotalQuantity()-1);
             });
 
         }
@@ -186,8 +196,12 @@ export class CartComponent {
         });
     }
 
-    getTotalQuantity(): number {
-        return this.cartItems.reduce((total, item) => total + item.quantity, 0);
+    getTotalQuantity(): number  {
+        let totalQuantity = 0;
+        this.totalQuantity.subscribe((total) => {
+            totalQuantity = total;
+        });
+        return totalQuantity;
     }
 
     getSubtotal(): number {
