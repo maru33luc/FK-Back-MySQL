@@ -14,8 +14,8 @@ module.exports = {
     createCart : async (userId) => {
         try{
             const carts = await cartModel.findAll();
-            const lenght = carts.length;
-            const cart = await cartModel.create({id: lenght+1, id_user: userId});
+            const length = carts.length;
+            const cart = await cartModel.create({id: length+1, id_user: userId});
             return cart;
         }catch(error){
             console.log(error);
@@ -72,8 +72,13 @@ module.exports = {
                 const item = await cartItemsModel.create({id: 1, id_cart: cart.dataValues.id, id_funko: cartItem.id_funko, cantidad: cartItem.quantity});
                 return item;
             }
-            const length = cartItems.length;
-            const item = await cartItemsModel.create({id: length+1, id_cart: cart.dataValues.id, id_funko: cartItem.id_funko, cantidad: cartItem.quantity, subtotal : 0});
+            let length = 0;
+            for (let item of cartItems) {
+                if (item.dataValues.id > length) {
+                    length = item.dataValues.id;
+                }
+            }
+            const item = await cartItemsModel.create({id: length +1, id_cart: cart.dataValues.id, id_funko: cartItem.id_funko, cantidad: cartItem.quantity, subtotal : 0});
             return item;
         }catch(error){
             console.log(error);

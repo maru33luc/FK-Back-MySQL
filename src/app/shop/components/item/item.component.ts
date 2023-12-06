@@ -75,7 +75,6 @@ export class ItemComponent implements AfterViewInit {
 
     private updateQuantity(change: number) {
         if (this.quantityButton) {
-            console.log(this.stock);
             let quantityValue = this.quantityButton.nativeElement.value;
 
             if (quantityValue === "" || isNaN(quantityValue)) {

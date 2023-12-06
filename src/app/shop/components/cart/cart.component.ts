@@ -33,14 +33,15 @@ export class CartComponent {
         this.loginService.authStateObservable()?.subscribe(async (user) => {
             if (user) {
                 this.user = this.loginService.authStateObservable();
-                await this.obtenerCart(user.id?.toString() ?? '');
-                
+                await this.obtenerCart(user.id?.toString() ?? ''); 
+                this.obtenerTotalPrice();
+                await this.loadFunkoDetails();
             } else {
                 this.user = undefined;
                 this.cartItems = [];
                 this.cartItems = await this.cartLocalService.getCart();
-                await this.loadFunkoDetails();
-                
+                await this.loadFunkoDetails(); 
+                 
             }
         });
         this.cartLocalService.cartSubject.subscribe(async (items) => {
@@ -49,14 +50,13 @@ export class CartComponent {
                 await this.loadFunkoDetails();
                  this.obtenerTotalPrice();
                 const totalItems = this.cartItems.reduce((total, item) => total + item.quantity, 0);
-                this.totalQuantity.next(totalItems);
-                
+                this.totalQuantity.next(totalItems);  
             }
         });
         this.cartService.cartSubject.subscribe(async (cart) => {
-            
             const carrito = cart;
             this.cartItems = [];
+            
             carrito.forEach((item) => {
                 this.cartItems.push({ funkoId: item.id_funko, quantity: item.cantidad });
                 this.cartItemsId.push(item.id_funko);
@@ -64,6 +64,7 @@ export class CartComponent {
             const totalItems = this.cartItems.reduce((total, item) => total + item.quantity, 0);
                 this.totalQuantity.next(totalItems);
                 this.obtenerTotalPrice();
+            
         });
     }
 
@@ -82,16 +83,9 @@ export class CartComponent {
 
     obtenerTotalPrice() {
         let total = 0;
-        console.log('this.cartItemsCopy', this.cartItemsCopy);
-        
-        // this.cartItemsCopy.forEach((item) => {
-        //     total += item.price * item.quantity;
-        // });
         for (const item of this.cartItemsCopy) {
             total += item.price * item.quantity;
         }
-        console.log('total', total);
-        console.log('this.totalPrice', this.totalPrice.value);
         this.totalPrice.next(total);
     }
 
@@ -116,8 +110,7 @@ export class CartComponent {
             }
         }
         // Convert the Map values back to an array
-        this.cartItemsCopy = Array.from(uniqueItemsMap.values());
-       
+        this.cartItemsCopy = Array.from(uniqueItemsMap.values());  
     }
 
     async increaseQuantity(item: any) {
@@ -152,7 +145,6 @@ export class CartComponent {
                 this.obtenerTotalPrice();
             }
         });
-        console.log('this.totalPrice.value', this.totalPrice.value);
     }
 
     async decreaseQuantity(item: any) {
@@ -210,6 +202,7 @@ export class CartComponent {
                             if (res) {
                                 this.cartItems = this.cartItems.filter((cartItem) => cartItem.funkoId !== item.id);
                             }
+                            await this.loadFunkoDetails();
                         }
                     });
                 } else {
@@ -223,26 +216,4 @@ export class CartComponent {
     getTotalQuantity(): Observable<number> {
         return this.totalQuantity;
     }
-
-    // getSubtotal(): number {
-    //     return this.cartItemsCopy.reduce((total, item) => total + (item.price * item.quantity), 0);
-        
-    // }
-
-    
-
-   
-
-    // getTotalPrice():string{
-    //     let total = '0';
-    //     this.totalPrice.subscribe((res) => {
-    //         total = res.toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: true});
-    //     });
-    //     console.log('total', total);
-    //     return total;
-    // }
-
-
-
-    
 }
