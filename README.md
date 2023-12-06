@@ -1,48 +1,58 @@
-# Welcome to FunkoStore!
+# Funko Store Online
 
-Thank you for choosing our application. Below, we provide you with the necessary information to test login functionality for both administrators and regular users.
+Bienvenido a Funko Store Online, una tienda online de Funkos con una interfaz atractiva y características avanzadas. Este proyecto utiliza Angular para el frontend con librerías como SweetAlert2 para los alerts, ngx-spinner para los spinners y AOS para animaciones fluidas. En el backend, NodeJS es la tecnología principal, y Sequelize se emplea para mapear la base de datos MySQL.
 
-## Administrator Credentials
+## Instrucciones de Uso
 
-To log in as an administrator, please use the following credentials:
+### Frontend
 
-- **Email:** admin@gmail.com
-- **Password:** 123456
+1. **Instalación de Dependencias**
+   Abra una terminal en la raíz del proyecto y ejecute:
 
-Please note that these credentials are intended exclusively for development and testing purposes.
+   ```bash
+   npm install
 
-## Regular User Credentials
+2. **Configuracion de la base de datos**
+   En el archivo /server/data/db.js modifique los campos de user, password y database con los datos de su base de datos MySQL.  
 
-If you wish to log in as a regular user, you can use the following credentials:
+3. **Iniciar el Servidor Front End**
+    Inicie el servidor de desarrollo ejecutando:
 
-- **Email:** user@gmail.com
-- **Password:** 123456
+    npm start
 
-Thank you for trying out our application! If you have any questions or encounter any issues, feel free to reach out to our support team.
+El servidor de desarrollo se iniciará en http://localhost:4200/
 
+4. **Migraciones**
+   Para crear las tablas de la base de datos, ejecute:
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.7.
+   ```bash
+   npx sequelize-cli db:migrate
 
-## Development server
+5. **Iniciar el Servidor Back End**
+   Abra una terminal en la carpeta server y ejecute:
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+   ```bash
+   npm install
 
-## Code scaffolding
+   npm run dev
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+El servidor de desarrollo se iniciará en http://localhost:3000/
 
-## Build
+6. **Registro de usuario**
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+    Para comenzar, registre un nuevo usuario a través de la interfaz. Este usuario puede ser promocionado a administrador si modifica el atributo isAdmin a true directamente en la base de datos.
+    Como administrador tendra acceso a la seccion de administracion, donde podra crear, editar y eliminar productos.
 
-## Running unit tests
+7. **Iniciar Sesión**
+    
+        Inicie sesión con el usuario creado en el paso anterior. Si el usuario es administrador, podrá acceder a la sección de administración.
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+8. **Realizar Compra**
 
-## Running end-to-end tests
+    Para realizar una compra, seleccione un producto y agreguelo al carrito. Luego, dirijase al carrito y complete los datos de envio. Finalmente, confirme la compra y se le redirigirá a la sección de compras, donde podrá ver el estado de sus compras.
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+9. **Ver Compras**
 
-## Further help
+    Para ver el estado de sus compras, dirijase a la sección de compras. Allí podrá ver el estado de sus compras. En caso de no estar logueado igualmente podra ver el estado de su carrito, ya que se almacena en el local storage.
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+    
