@@ -1,6 +1,6 @@
 # Funko Store Online
 
-Bienvenido a Funko Store Online, una tienda online de Funkos con una interfaz atractiva y características avanzadas. Este proyecto utiliza Angular para el frontend con librerías como SweetAlert2 para los alerts, ngx-spinner para los spinners y AOS para animaciones fluidas. En el backend, NodeJS es la tecnología principal, y Sequelize se emplea para mapear la base de datos MySQL.
+Bienvenido a Funko Store Online, una tienda online de Funkos con una interfaz atractiva y características avanzadas. Este proyecto utiliza Angular para el frontend con librerías como SweetAlert2 para los alerts, ngx-spinner para los spinners y AOS para animaciones fluidas. En el backend, NodeJS es la tecnología principal, empleandose el framework Express, que ofrece características como manejo de rutas, middleware, plantillas, y gestión de errores para facilitar el desarrollo web con Node.js. Se integra ademas con Express Validator para validar datos del cliente, Bcrypt para el hash de contraseñas y Sequelize para mapear la base de datos MySQL.
 
 ## Instrucciones de Uso
 
