@@ -34,22 +34,27 @@ export class CartComponent {
             if (user) {
                 this.user = this.loginService.authStateObservable();
                 await this.obtenerCart(user.id?.toString() ?? '');
+                
             } else {
                 this.user = undefined;
                 this.cartItems = [];
                 this.cartItems = await this.cartLocalService.getCart();
                 await this.loadFunkoDetails();
+                
             }
         });
         this.cartLocalService.cartSubject.subscribe(async (items) => {
             if (this.user == undefined) {
                 this.cartItems = items;
                 await this.loadFunkoDetails();
+                 this.obtenerTotalPrice();
                 const totalItems = this.cartItems.reduce((total, item) => total + item.quantity, 0);
                 this.totalQuantity.next(totalItems);
+                
             }
         });
         this.cartService.cartSubject.subscribe(async (cart) => {
+            
             const carrito = cart;
             this.cartItems = [];
             carrito.forEach((item) => {
@@ -58,6 +63,7 @@ export class CartComponent {
             });
             const totalItems = this.cartItems.reduce((total, item) => total + item.quantity, 0);
                 this.totalQuantity.next(totalItems);
+                this.obtenerTotalPrice();
         });
     }
 
@@ -74,11 +80,26 @@ export class CartComponent {
         } return null;
     }
 
+    obtenerTotalPrice() {
+        let total = 0;
+        console.log('this.cartItemsCopy', this.cartItemsCopy);
+        
+        // this.cartItemsCopy.forEach((item) => {
+        //     total += item.price * item.quantity;
+        // });
+        for (const item of this.cartItemsCopy) {
+            total += item.price * item.quantity;
+        }
+        console.log('total', total);
+        console.log('this.totalPrice', this.totalPrice.value);
+        this.totalPrice.next(total);
+    }
+
     async loadFunkoDetails() {
         this.cartItemsCopy = []; // Clear the array before populating it again
         // Use a Map to track unique items based on funkoId
         const uniqueItemsMap = new Map<number, any>();
-
+        
         for (const item of this.cartItems) {
             try {
                 const funko: any | undefined = await this.funkoService.getFunko(item.funkoId);
@@ -86,6 +107,7 @@ export class CartComponent {
                     const itemACopiar = { ...funko, quantity: item.quantity };
                     // Use funkoId as the key to ensure uniqueness
                     uniqueItemsMap.set(item.funkoId, itemACopiar);
+                    
                 } else {
                     console.log('Item not found:', item);
                 }
@@ -95,6 +117,7 @@ export class CartComponent {
         }
         // Convert the Map values back to an array
         this.cartItemsCopy = Array.from(uniqueItemsMap.values());
+       
     }
 
     async increaseQuantity(item: any) {
@@ -112,6 +135,8 @@ export class CartComponent {
 
                 // Actualiza la cantidad localmente después de la confirmación del servidor
                 item.quantity = updatedQuantity;
+                // this.totalPrice.next(this.totalPrice.value + item.price);
+                this.obtenerTotalPrice();
             }
             else {
                 const funko: FunkoCart = {
@@ -124,8 +149,10 @@ export class CartComponent {
                 await this.funkoService.actualizarStock(item.id, item.stock - 1);
                 item.stock--;
                 this.totalQuantity.next(this.totalQuantity.value + 1);
+                this.obtenerTotalPrice();
             }
         });
+        console.log('this.totalPrice.value', this.totalPrice.value);
     }
 
     async decreaseQuantity(item: any) {
@@ -143,7 +170,8 @@ export class CartComponent {
                     const res = await this.cartService.actualizarCantidades(userId, this.cart.id, item.id, updatedQuantity);
 
                     // Actualiza la cantidad localmente después de la confirmación del servidor
-                    item.quantity = updatedQuantity;    
+                    item.quantity = updatedQuantity;  
+                    this.obtenerTotalPrice();  
                 }
                 else {
                     const funko: FunkoCart = {
@@ -155,6 +183,7 @@ export class CartComponent {
                     await this.funkoService.actualizarStock(item.id, item.stock + 1);
                     item.stock++;
                     this.totalQuantity.next(this.totalQuantity.value - 1);
+                    this.obtenerTotalPrice();
                 }
             });
         }
@@ -195,12 +224,25 @@ export class CartComponent {
         return this.totalQuantity;
     }
 
-    getSubtotal(): number {
-        // return this.cartItems.reduce((total, item) => total + item.quantity * item.price, 0);
-        return 1;
-    }
+    // getSubtotal(): number {
+    //     return this.cartItemsCopy.reduce((total, item) => total + (item.price * item.quantity), 0);
+        
+    // }
 
-    getTotalPrice(): number {
-        return this.getSubtotal();
-    }
+    
+
+   
+
+    // getTotalPrice():string{
+    //     let total = '0';
+    //     this.totalPrice.subscribe((res) => {
+    //         total = res.toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: true});
+    //     });
+    //     console.log('total', total);
+    //     return total;
+    // }
+
+
+
+    
 }

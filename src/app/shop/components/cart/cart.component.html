@@ -43,7 +43,7 @@
 
             <div class="cart-resumen-line">
                 <p>SUBTOTAL</p>
-                <p>${{getSubtotal().toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: true})}}</p>
+                <p>${{ totalPrice | async }}</p>
             </div>
 
             <div class="cart-resumen-line">
@@ -53,7 +53,7 @@
 
             <div class="cart-resumen-line">
                 <p>TOTAL</p>
-                <p>${{getTotalPrice().toLocaleString('es', { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: true})}}</p>
+                <p>$</p>
             </div>
         </article>
 
