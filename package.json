@@ -25,7 +25,7 @@
         "axios": "^1.6.0",
         "firebase": "^10.5.2",
         "json-server": "^0.17.4",
-        "mysql2": "^3.6.5",
+        "mysql2": "^3.9.4",
         "ngx-spinner": "^16.0.2",
         "rxjs": "~7.8.0",
         "sequelize": "^6.35.1",
